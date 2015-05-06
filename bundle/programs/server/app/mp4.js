@@ -6,27 +6,23 @@ if (Meteor.isClient) {
     // This code only runs on the client
     Template.body.helpers({
         users: function () {
-            if (Session.get("hideCompleted")) {
-                // If hide completed is checked, filter tasks
-                return Users.find({});
-            } else {
-                // Otherwise, return all of the tasks
-                return Users.find({}, {});
-            }
+            return Users.find({}, {});
+
         },
         user_details:function () {
             var User_Id = Session.get("user_id");
             return Users.find({_id:User_Id});
         },
         tasks: function () {
+            console.log(Session.get("hideCompleted"));
             if (Session.get("hideCompleted")) {
                 var sort_method = Session.get('sort') || 'dateCreated';
 
                 if(sort_method=='name') {
-                    return Tasks.find({completed: false}, {skip: Session.get('skip'), limit:5, sort: {name: Session.get('ascending')}});
+                    return Tasks.find({completed: "False"}, {skip: Session.get('skip'), limit:5, sort: {name: Session.get('ascending')}});
                 }
                 else if(sort_method=='dateCreated'){
-                    return Tasks.find({completed: false}, {skip: Session.get('skip'), limit:5, sort: {dateCreated: Session.get('ascending')}});
+                    return Tasks.find({completed: "False"}, {skip: Session.get('skip'), limit:5, sort: {dateCreated: Session.get('ascending')}});
                 }
             } else {
                 var sort_method = Session.get('sort') || 'dateCreated';;
@@ -118,11 +114,6 @@ if (Meteor.isClient) {
             Meteor.call('getTaskName', this.parentid, function(err, ret){
                 Session.set("pendingTaskNames",ret);
             });
-            //var task = Tasks.findOne({_id: this._id});
-            //console.log(task);
-            //Session.set('complete', task.completed);
-            //Session.get('pendingTask');
-            //Meteor.call('getTaskName', )
         },
         "click .ascending": function(){
             Session.set('ascending', 1);
@@ -165,11 +156,9 @@ if (Meteor.isClient) {
             Meteor.call('insertUser', username, email, null, function(err, msg){
                 Session.set('Message', msg);
             });
-            // Clear form
 
             event.target.username.value = "";
             event.target.email.value = "";
-            // Prevent default form submit
             return false;
         },
 
@@ -225,23 +214,23 @@ if (Meteor.isClient) {
         "click .user": function () {
             Session.set("isUser",true);
             Session.set("isTask",false);
-            Session.set("isTaskDetail",false);
             Session.set("isUserDetail",false);
+            Session.set("isTaskDetail",false);
             Session.set("isTaskEdit",false);
         },
 
         "click .task": function () {
-            Session.set("isUser",false);
             Session.set("isTask",true);
+            Session.set("isUser",false);
             Session.set("isTaskDetail",false);
             Session.set("isUserDetail",false);
             Session.set("isTaskEdit",false);
         },
         "click .user_id": function () {
+            Session.set("isUserDetail",true);
             Session.set("isUser",false);
             Session.set("isTask",false);
             Session.set("isTaskDetail",false);
-            Session.set("isUserDetail",true);
             Session.set("isTaskEdit",false);
             Session.set("user_id",this._id);
             Meteor.call('getTaskName', this._id, function(err, ret){
@@ -249,9 +238,9 @@ if (Meteor.isClient) {
             });
         },
         "click .task_id": function () {
+            Session.set("isTaskDetail",true);
             Session.set("isUser",false);
             Session.set("isTask",false);
-            Session.set("isTaskDetail",true);
             Session.set("isUserDetail",false);
             Session.set("isTaskEdit",false);
             Session.set("task_id",this._id);
@@ -259,11 +248,11 @@ if (Meteor.isClient) {
         },
         "click .task_edit": function () {
 
-            Session.set("isUser",false);
+            Session.set("isTaskEdit",true);
             Session.set("isTask",false);
             Session.set("isTaskDetail",false);
+            Session.set("isUser",false);
             Session.set("isUserDetail",false);
-            Session.set("isTaskEdit",true);
             Session.set("task_id",this._id);
 
         }
